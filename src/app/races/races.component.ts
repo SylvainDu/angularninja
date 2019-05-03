@@ -8,10 +8,11 @@ import { RaceModel } from '../models/race.model';
   styleUrls: ['./races.component.css']
 })
 export class RacesComponent implements OnInit {
-  races: Array<RaceModel>;
+  races: Array<RaceModel> = [];
+  
   constructor(private raceService: RaceService) { }
 
   ngOnInit() {
-    this.races = this.raceService.list();
+    this.raceService.list().subscribe(races => this.races = races);
   }
 }

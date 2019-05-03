@@ -1,14 +1,18 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { MenuComponent } from './menu/menu.component';
 import { RacesComponent } from './races/races.component';
+import { RaceComponent } from './race/race.component';
+import { PonyComponent } from './pony/pony.component';
 
 describe('AppComponent', () => {
 
   beforeEach(() => TestBed.configureTestingModule({
-    declarations: [AppComponent, MenuComponent, RacesComponent]
+    imports: [HttpClientTestingModule],
+    declarations: [AppComponent, MenuComponent, RacesComponent, RaceComponent, PonyComponent]
   }));
 
   it('should have a title', () => {

@@ -11,7 +11,6 @@ export class RaceComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {    
-  }
+  ngOnInit() {}
 
 }

@@ -2,11 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
 import { UserService } from './user.service';
+import { JwtInterceptorService } from './jwt-interceptor.service';
 
 describe('UserService', () => {
 
   let userService: UserService;
   let http: HttpTestingController;
+  let jwtInterceptorService: JwtInterceptorService;
 
   const user = {
     id: 1,
@@ -23,6 +25,7 @@ describe('UserService', () => {
   beforeEach(() => {
     userService = TestBed.get(UserService);
     http = TestBed.get(HttpTestingController);
+    jwtInterceptorService = TestBed.get(JwtInterceptorService);
   });
 
   afterAll(() => http.verify());
@@ -39,8 +42,8 @@ describe('UserService', () => {
   });
 
   it('should authenticate a user', () => {
-    // spy on userEvents
-    spyOn(userService.userEvents, 'next');
+    // spy on the store method
+    spyOn(userService, 'storeLoggedInUser');
 
     const credentials = { login: 'cedric', password: 'hello' };
     let actualUser;
@@ -51,6 +54,50 @@ describe('UserService', () => {
     req.flush(user);
 
     expect(actualUser).withContext('The observable should emit the user').toBe(user);
+    expect(userService.storeLoggedInUser).toHaveBeenCalledWith(user);
+  });
+
+  it('should store the logged in user', () => {
+    spyOn(userService.userEvents, 'next');
+    spyOn(Storage.prototype, 'setItem');
+    spyOn(jwtInterceptorService, 'setJwtToken');
+
+    userService.storeLoggedInUser(user);
+
     expect(userService.userEvents.next).toHaveBeenCalledWith(user);
+    expect(Storage.prototype.setItem).toHaveBeenCalledWith('rememberMe', JSON.stringify(user));
+    expect(jwtInterceptorService.setJwtToken).toHaveBeenCalledWith(user.token);
+  });
+
+  it('should retrieve a user if one is stored', () => {
+    spyOn(userService.userEvents, 'next');
+    spyOn(Storage.prototype, 'getItem').and.returnValue(JSON.stringify(user));
+    spyOn(jwtInterceptorService, 'setJwtToken');
+
+    userService.retrievedUser();
+
+    expect(userService.userEvents.next).toHaveBeenCalledWith(user);
+    expect(jwtInterceptorService.setJwtToken).toHaveBeenCalledWith(user.token);
+  });
+
+  it('should retrieve no user if none stored', () => {
+    spyOn(userService.userEvents, 'next');
+    spyOn(Storage.prototype, 'getItem');
+
+    userService.retrievedUser();
+
+    expect(userService.userEvents.next).not.toHaveBeenCalled();
+  });
+
+  it('should logout the user', () => {
+    spyOn(userService.userEvents, 'next');
+    spyOn(Storage.prototype, 'removeItem');
+    spyOn(jwtInterceptorService, 'removeJwtToken');
+
+    userService.logout();
+
+    expect(userService.userEvents.next).toHaveBeenCalledWith(null);
+    expect(Storage.prototype.removeItem).toHaveBeenCalledWith('rememberMe');
+    expect(jwtInterceptorService.removeJwtToken).toHaveBeenCalled();
   });
 });

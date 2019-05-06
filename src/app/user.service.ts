@@ -1,24 +1,29 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+import { UserModel } from './models/user.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  baseUrl: string = 'http://ponyracer.ninja-squad.com';
 
-  constructor(private http: HttpClient) { }
+  userEvents = new BehaviorSubject<UserModel>(undefined);
 
-  register(login: string, password: string, birthYear: number): Observable<any> {
-    const myData = { login: login, password: password, birthYear: birthYear};
-    
-    return this.http.post(`${this.baseUrl}/api/users`, myData);
+  constructor(private http: HttpClient) {
   }
 
-  authenticate(user: any): Observable<any> {
-    console.log(user);
-    
-    return this.http.post(`${this.baseUrl}/api/users/authentication`, user)
+  register(login: string, password: string, birthYear: number): Observable<UserModel> {
+    const body = { login, password, birthYear };
+    return this.http.post<UserModel>('http://ponyracer.ninja-squad.com/api/users', body);
   }
+
+  authenticate(credentials: { login: string; password: string }): Observable<UserModel> {
+    return this.http.post<UserModel>('http://ponyracer.ninja-squad.com/api/users/authentication', credentials).pipe(
+      tap((user: UserModel) => this.userEvents.next(user))
+    );
+  }
+
 }

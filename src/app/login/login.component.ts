@@ -20,12 +20,10 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
   }
 
-  authenticate() {
-    console.log(this.credentials);
-    
+  authenticate() { 
     this.userService.authenticate(this.credentials).subscribe(
       () => this.router.navigate(['/']),
-      () => this.authenticationFailed = true
+      () => this.authenticationFailed = true,
     )
   }
 }

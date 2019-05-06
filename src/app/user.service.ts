@@ -15,4 +15,10 @@ export class UserService {
     
     return this.http.post(`${this.baseUrl}/api/users`, myData);
   }
+
+  authenticate(user: any): Observable<any> {
+    console.log(user);
+    
+    return this.http.post(`${this.baseUrl}/api/users/authentication`, user)
+  }
 }
